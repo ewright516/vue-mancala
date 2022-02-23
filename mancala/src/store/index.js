@@ -20,12 +20,23 @@ const store = createStore({
         14: 0,
       },
       bottomTurn: true,
+      gameOver: false,
     },
   },
   mutations: {
     makeMove(state, start) {
       // TODO: captures
       let stones = state.board.pocket[start];
+      let finalPocket = start + state.board.pocket[start];
+      while (finalPocket > 14) {
+        finalPocket = finalPocket - 14;
+      }
+      if (state.board.bottomTurn && finalPocket === 14) {
+        finalPocket = 1;
+      } else if (!state.board.bottomTurn && finalPocket === 7) {
+        finalPocket = 8;
+      }
+      console.log("Final: " + finalPocket);
       for (let i = 1; i <= stones; i++) {
         let newPocket = start + i;
         if (state.board.bottomTurn && newPocket == 14) {
@@ -41,17 +52,51 @@ const store = createStore({
         }
       }
       console.log(stones);
-      if (state.board.bottomTurn && start + state.board.pocket[start] === 7) {
+      if (state.board.bottomTurn && finalPocket === 7) {
         console.log();
-      } else if (
-        !state.board.bottomTurn &&
-        start + state.board.pocket[start] === 14
-      ) {
+      } else if (!state.board.bottomTurn && finalPocket === 14) {
       } else {
-        console.log("switch");
-        state.board.bottomTurn = !state.board.bottomTurn;
+        const oppositePocket = Math.abs(14 - finalPocket);
+        if (
+          state.board.bottomTurn &&
+          finalPocket < 7 &&
+          state.board.pocket[finalPocket] === 1
+        ) {
+          state.board.pocket[7] =
+            state.board.pocket[7] + state.board.pocket[oppositePocket] + 1;
+          state.board.pocket[finalPocket] = 0;
+          state.board.pocket[oppositePocket] = 0;
+          console.log("switch");
+          state.board.bottomTurn = !state.board.bottomTurn;
+        } else if (
+          !state.board.bottomTurn &&
+          finalPocket > 7 &&
+          state.board.pocket[finalPocket] === 1
+        ) {
+          state.board.pocket[14] =
+            state.board.pocket[14] + state.board.pocket[oppositePocket] + 1;
+          state.board.pocket[finalPocket] = 0;
+          state.board.pocket[oppositePocket] = 0;
+          console.log("switch");
+          state.board.bottomTurn = !state.board.bottomTurn;
+        } else {
+          console.log("switch");
+          state.board.bottomTurn = !state.board.bottomTurn;
+        }
       }
       state.board.pocket[start] = 0;
+    },
+    gameEnd(state, { top, bottom }) {
+      state.board.pocket[7] = state.board.pocket[7] + bottom;
+      state.board.pocket[14] = state.board.pocket[14] + top;
+      for (let x = 1; x < 14; x++) {
+        if (x === 7 || x === 14) {
+          continue;
+        }
+        state.board.pocket[x] = 0;
+      }
+      state.board.gameOver = true;
+      console.log("game over");
     },
   },
   actions: {
