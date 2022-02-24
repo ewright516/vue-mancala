@@ -13,7 +13,6 @@ import { useStore } from 'vuex'
 
 const store = useStore()
 const bottomTurn = computed(() => store.state.board.bottomTurn)
-const gameOver = computed(() => store.state.board.gameOver)
 const pockets = store.state.board.pocket
 const handleClick = (pocket, turn) => {
     if((turn && pocket < 7)||(!turn && pocket > 7)){
@@ -26,6 +25,7 @@ const handleClick = (pocket, turn) => {
 }
 
 onUpdated(() => {
+    const gameOver = computed(() => store.state.board.gameOver)
     console.log("Game is over? " + gameOver.value)
     let bottomTotal = 0
     let topTotal = 0
